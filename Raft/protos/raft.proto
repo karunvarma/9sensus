@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+
+
+package Raft;
+
+// The greeting service definition.
+service RaftNodeService  {
+  // Sends a greeting
+  rpc RequestVote (RequestVoteRequest) returns (RequestVoteResponse);
+  rpc AppendEntries (AppendEntriesRequest) returns (AppendEntriesResponse);
+}
+
+
+message LogEntry {
+    int64 index = 1;
+    int64 term = 2;
+    bytes commnad = 3;
+}
+
+
+// Invoked by candidates to gather vote
+message RequestVoteRequest{
+	int64 term = 1; // candidate’s term
+    string candidateId = 2; // candidate requesting vote
+    int64 lastLogIndex = 3; // index of candidate’s last log entry
+    int64 lastLogTerm = 4;  // term of candidate’s last log entry
+}
+
+
+
+message RequestVoteResponse{
+    int64 term = 1; // currentTerm, for candidate to update itself
+    bool voteGranted = 2; // true means candidate received vote
+} 
+
+
+// Invoked by leader to replicate log entries; also used as heartbeat
+message AppendEntriesRequest {
+    int64 term = 1; // leader’s term
+    string leaderId = 2; // so follower can redirect clients
+    int64 prevLogIndex = 3; // index of log entry immediately preceding new ones
+    int64 prevLogTerm = 4; // term of prevLogIndex entry
+    repeated LogEntry entries = 5;// og entries to store (empty for heartbeatmay send more than one for efficiency 
+    int64 leaderCommit = 6; // leader’s commitIndex
+}
+
+
+
+
+message AppendEntriesResponse {
+    int64 term = 1; // currentTerm, for leader to update itself
+    bool success = 2; //true if follower contained entry matching prevLogIndex and prevLogTerm
+}
